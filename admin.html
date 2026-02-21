@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin - Upload Audio</title>
-    <link rel="stylesheet" href="style.css">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<h2>Upload Audio</h2>
+<h2>Upload Audio / Khutbah</h2>
+
+<input type="text" id="title" placeholder="Title"><br><br>
 
 <select id="category">
-    <option value="Khutbah">Khutbah</option>
-    <option value="Darsa Wikiendi">Darsa Wikiendi</option>
-    <option value="Darsa Ramadhani">Darsa Ramadhani</option>
-</select>
+<option value="Khutbah">Khutbah</option>
+<option value="Jumamosi">Darsa Jumamosi</option>
+<option value="Jumapili">Darsa Jumapili</option>
+<option value="Ramadhani">Ramadhani</option>
+</select><br><br>
 
-<input type="text" id="title" placeholder="Kichwa cha Mada">
-<input type="file" id="audioFile" accept="audio/*">
-<button id="uploadBtn">Upload</button>
+<input type="text" id="audio" placeholder="Audio Link"><br><br>
+
+<button onclick="saveData()">Save</button>
 
 <script type="module">
-import { db, storage } from './firebase.js';
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-document.getElementById("uploadBtn").onclick = async () => {
-    const title = document.getElementById("title").value;
-    const category = document.getElementById("category").value;
-    const file = document.getElementById("audioFile").files[0];
+const firebaseConfig = YOUR_FIREBASE_CONFIG_HERE;
 
-    if (!file || !title) return alert("Jaza kila kitu");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    const storageRef = ref(storage, 'audios/' + file.name);
-    await uploadBytes(storageRef, file);
+window.saveData = async function(){
+const title = document.getElementById("title").value;
+const category = document.getElementById("category").value;
+const audio = document.getElementById("audio").value;
 
-    const url = await getDownloadURL(storageRef);
+await addDoc(collection(db,"audios"),{
+title,
+category,
+audio,
+date: new Date()
+});
 
-    await addDoc(collection(db, "audios"), {
-        title,
-        category,
-        url,
-        createdAt: new Date()
-    });
-
-    alert("Audio imepakiwa kikamilifu!");
-};
+alert("Saved!");
+}
 </script>
 
 </body>
