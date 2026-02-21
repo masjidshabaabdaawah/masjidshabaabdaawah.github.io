@@ -1,17 +1,23 @@
-// IMPORTS
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-// CONFIG (WEKA YAKO HAPA)
-const firebaseConfig = {
-  apiKey: "AIzaSyCP9rS5F84AuO5QFyGv355GLlKxrfF7UT4",
-  authDomain: "masjid-shabaab-daa-wah.firebaseapp.com",
-  projectId: "masjid-shabaab-daa-wah",
-  storageBucket: "masjid-shabaab-daa-wah.firebasestorage.app",
-  messagingSenderId: "615883244718",
-  appId: "1:615883244718:web:e4696fd47ea9d84ac6d93f",
-};
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsuZ_Ks_VMEo62P-9n0G2Q-UShD_FD6rE",
+    authDomain: "masjid-shabaab-daa-wah-4f49b.firebaseapp.com",
+    projectId: "masjid-shabaab-daa-wah-4f49b",
+    storageBucket: "masjid-shabaab-daa-wah-4f49b.firebasestorage.app",
+    messagingSenderId: "287019093594",
+    appId: "1:287019093594:web:1b343aed72f3433b36d263",
+    measurementId: "G-7FDEXT4DMB"
+  };
 
-const app = initializeApp(firebaseConfig);
-
-export const db = getFirestore(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
