@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<h2>Upload Audio / Khutbah</h2>
+<h2>Upload Audio</h2>
 
 <input type="text" id="title" placeholder="Title"><br><br>
 
@@ -17,39 +17,64 @@
 <option value="Ramadhani">Ramadhani</option>
 </select><br><br>
 
-<input type="text" id="audio" placeholder="Audio Link"><br><br>
+<input type="text" id="audio" placeholder="Audio Link (Direct Download Link)"><br><br>
 
-<button onclick="saveData()">Save</button>
+<button onclick="saveAudio()">Save Audio</button>
+
+<hr>
+
+<h2>Update Ratiba ya Swala</h2>
+
+<input type="text" id="fajr" placeholder="Fajr"><br><br>
+<input type="text" id="dhuhr" placeholder="Dhuhr"><br><br>
+<input type="text" id="asr" placeholder="Asr"><br><br>
+<input type="text" id="maghrib" placeholder="Maghrib"><br><br>
+<input type="text" id="isha" placeholder="Isha"><br><br>
+
+<button onclick="saveSchedule()">Save Ratiba</button>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "WEKA_API_KEY_YAKO",
-  authDomain: "masjid-shabaab-daa-wah-4f49b.firebaseapp.com",
-  projectId: "masjid-shabaab-daa-wah-4f49b",
-  storageBucket: "masjid-shabaab-daa-wah-4f49b.firebasestorage.app",
-  messagingSenderId: "287019093594",
-  appId: "1:287019093594:web:1b343aed72f3433b36d263"
+apiKey: "WEKA_API_KEY",
+authDomain: "masjid-shabaab-daa-wah-4f49b.firebaseapp.com",
+projectId: "masjid-shabaab-daa-wah-4f49b",
+storageBucket: "masjid-shabaab-daa-wah-4f49b.firebasestorage.app",
+messagingSenderId: "287019093594",
+appId: "1:287019093594:web:1b343aed72f3433b36d263"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.saveData = async function(){
-
-const title = document.getElementById("title").value;
-const category = document.getElementById("category").value;
-const audio = document.getElementById("audio").value;
+window.saveAudio = async function(){
 
 await addDoc(collection(db,"audios"),{
-title,
-category,
-audio,
+title: document.getElementById("title").value,
+category: document.getElementById("category").value,
+audio: document.getElementById("audio").value,
 date: new Date()
 });
 
-alert("Saved!");
+alert("Audio Saved!");
 };
+
+window.saveSchedule = async function(){
+
+await setDoc(doc(db,"salah_schedule","today"),{
+fajr: document.getElementById("fajr").value,
+dhuhr: document.getElementById("dhuhr").value,
+asr: document.getElementById("asr").value,
+maghrib: document.getElementById("maghrib").value,
+isha: document.getElementById("isha").value
+});
+
+alert("Ratiba Saved!");
+};
+
 </script>
+
+</body>
+</html>
