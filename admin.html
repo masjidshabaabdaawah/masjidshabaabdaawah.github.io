@@ -41,20 +41,22 @@ border-radius:6px;
 </style>  </head>  
 <body>  <div class="login-box">  
 <h2>Admin Login</h2>  
-<input type="password" id="password" placeholder="Enter Password">  
-<button onclick="checkPassword()">Login</button>  
-</div>  <script>  
-function checkPassword(){
-const pass=document.getElementById("password").value;
+<input type="password" id="password" placeholder="Enter Password">
 
-if(pass==="Shabaab2026"){
+<button id="loginBtn">Login</button>
 
-  if(pass === correctPassword){
+<script>
+document.getElementById("loginBtn").addEventListener("click", function(){
+
+const pass = document.getElementById("password").value;
+const correctPassword = "Shabaab2026";
+
+if(pass === correctPassword){
 localStorage.setItem("adminLogged","true");
 window.location.href = "dashboard.html";
 }else{
 alert("Wrong Password!");
 }
-}
+
+});
 </script>
-</html>
