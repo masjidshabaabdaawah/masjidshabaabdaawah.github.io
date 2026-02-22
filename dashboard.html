@@ -4,7 +4,6 @@
 <title>Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- ================= FIREBASE ================= -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -14,54 +13,28 @@ from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
 
-/* 🔥 WEKA FIREBASE CONFIG YAKO HAPA */
+/* 🔥 WEKA CONFIG YAKO HAPA */
 const firebaseConfig = {
 apiKey: "AIzaSyCP9rS5F84AuO5QFyGv355GLlKxrfF7UT4",
 authDomain: "masjid-shabaab-daa-wah.firebaseapp.com",
-projectId: "masjid-shabaab-daa-wah",
+projectId: "615883244718",
 storageBucket: "masjid-shabaab-daa-wah.firebasestorage.app",
-messagingSenderId: "615883244718",
-appId: "G-NERS9HHKLE"
+messagingSenderId: "G-NERS9HHKLE",
+appId: "1:615883244718:web:d9970c4ae55cb247c6d93f"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-/* ================= LOGIN PROTECTION ================= */
+/* 🔐 LOGIN PROTECTION */
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get("auth") !== "ok"){
 window.location.href = "admin.html";
 }
 
-/* ================= SAVE AUDIO ================= */
-window.saveAudio = async function(){
-
-const title = document.getElementById("title").value;
-const category = document.getElementById("category").value;
-const file = document.getElementById("audioFile").files[0];
-
-if(!file){
-alert("Select Audio File");
-return;
-}
-
-const storageRef = ref(storage, "audios/" + file.name);
-await uploadBytes(storageRef, file);
-const url = await getDownloadURL(storageRef);
-
-await addDoc(collection(db,"audios"),{
-title:title,
-category:category,
-audio:url,
-date:new Date()
-});
-
-alert("Audio Uploaded ✅");
-loadAudios();
-}
-
 /* ================= LOAD AUDIO ================= */
+
 window.loadAudios = async function(){
 
 const querySnapshot = await getDocs(collection(db,"audios"));
@@ -85,41 +58,15 @@ list.innerHTML += `
 `;
 
 });
+
 }
 
-/* ================= DELETE AUDIO ================= */
+/* ================= DELETE ================= */
+
 window.deleteAudio = async function(id){
 await deleteDoc(doc(db,"audios",id));
 alert("Deleted ✅");
 loadAudios();
-}
-
-/* ================= FILTER ================= */
-window.filterCategory = async function(category){
-
-const querySnapshot = await getDocs(collection(db,"audios"));
-const list = document.getElementById("audioList");
-list.innerHTML = "";
-
-querySnapshot.forEach((docSnap)=>{
-const data = docSnap.data();
-
-if(category === "" || data.category === category){
-
-list.innerHTML += `
-<div style="border:1px solid #ccc;padding:10px;margin:10px;">
-<h4>${data.title}</h4>
-<p>Category: ${data.category}</p>
-<audio controls>
-<source src="${data.audio}">
-</audio>
-<br><br>
-<button onclick="deleteAudio('${docSnap.id}')">Delete</button>
-</div>
-`;
-
-}
-});
 }
 
 window.onload = loadAudios;
@@ -165,6 +112,90 @@ window.onload = loadAudios;
 <hr>
 
 <button onclick="window.location.href='admin.html'">Logout</button>
+
+<script>
+
+/* ================= SAVE AUDIO ================= */
+
+async function saveAudio(){
+
+const title = document.getElementById("title").value;
+const category = document.getElementById("category").value;
+const fileInput = document.getElementById("audioFile");
+const file = fileInput.files[0];
+
+if(!title){
+alert("Enter Title");
+return;
+}
+
+if(!file){
+alert("Select Audio File");
+return;
+}
+
+try{
+
+const storageRef = ref(storage, "audios/" + Date.now() + "_" + file.name);
+
+await uploadBytes(storageRef, file);
+const url = await getDownloadURL(storageRef);
+
+await addDoc(collection(db,"audios"),{
+title:title,
+category:category,
+audio:url,
+date:new Date().toISOString()
+});
+
+alert("Audio Uploaded ✅");
+
+fileInput.value = "";
+document.getElementById("title").value = "";
+
+loadAudios();
+
+}catch(error){
+console.log(error);
+alert("Upload Failed ❌");
+}
+
+}
+
+/* ================= FILTER ================= */
+
+async function filterCategory(category){
+
+const querySnapshot = await getDocs(collection(db,"audios"));
+const list = document.getElementById("audioList");
+list.innerHTML = "";
+
+querySnapshot.forEach((docSnap)=>{
+
+const data = docSnap.data();
+
+if(category === "" || data.category === category){
+
+list.innerHTML += `
+<div style="border:1px solid #ccc;padding:10px;margin:10px;">
+<h4>${data.title}</h4>
+<p>Category: ${data.category}</p>
+<audio controls>
+<source src="${data.audio}">
+</audio>
+<br><br>
+<button onclick="deleteAudio('${docSnap.id}')">Delete</button>
+</div>
+`;
+
+}
+
+});
+}
+
+window.filterCategory = filterCategory;
+
+</script>
 
 </body>
 </html>
