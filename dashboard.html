@@ -4,11 +4,17 @@
 <title>Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- ================= FIREBASE ================= -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+import { getStorage, ref, uploadBytes, getDownloadURL } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
+
+/* 🔥 WEKA FIREBASE CONFIG YAKO HAPA */
 const firebaseConfig = {
 apiKey: "AIzaSyCP9rS5F84AuO5QFyGv355GLlKxrfF7UT4",
 authDomain: "masjid-shabaab-daa-wah.firebaseapp.com",
@@ -20,60 +26,100 @@ appId: "G-NERS9HHKLE"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 /* ================= LOGIN PROTECTION ================= */
-
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get("auth") !== "ok"){
 window.location.href = "admin.html";
 }
 
-/* ================= UPLOAD AUDIO ================= */
-
+/* ================= SAVE AUDIO ================= */
 window.saveAudio = async function(){
 
 const title = document.getElementById("title").value;
-const audio = document.getElementById("audio").value;
+const category = document.getElementById("category").value;
+const file = document.getElementById("audioFile").files[0];
+
+if(!file){
+alert("Select Audio File");
+return;
+}
+
+const storageRef = ref(storage, "audios/" + file.name);
+await uploadBytes(storageRef, file);
+const url = await getDownloadURL(storageRef);
 
 await addDoc(collection(db,"audios"),{
 title:title,
-audio:audio,
+category:category,
+audio:url,
 date:new Date()
 });
 
-alert("Audio Saved!");
+alert("Audio Uploaded ✅");
 loadAudios();
 }
 
-/* ================= LOAD AUDIO LIST ================= */
-
-async function loadAudios(){
+/* ================= LOAD AUDIO ================= */
+window.loadAudios = async function(){
 
 const querySnapshot = await getDocs(collection(db,"audios"));
 const list = document.getElementById("audioList");
-
 list.innerHTML = "";
 
 querySnapshot.forEach((docSnap)=>{
 
+const data = docSnap.data();
+
 list.innerHTML += `
-<div style="border:1px solid #ccc; padding:10px; margin:5px;">
-<h4>${docSnap.data().title}</h4>
-<a href="${docSnap.data().audio}" target="_blank">Play</a>
+<div style="border:1px solid #ccc;padding:10px;margin:10px;">
+<h4>${data.title}</h4>
+<p>Category: ${data.category}</p>
+<audio controls>
+<source src="${data.audio}">
+</audio>
 <br><br>
 <button onclick="deleteAudio('${docSnap.id}')">Delete</button>
 </div>
 `;
 
 });
-
 }
 
+/* ================= DELETE AUDIO ================= */
 window.deleteAudio = async function(id){
-
 await deleteDoc(doc(db,"audios",id));
-alert("Deleted!");
+alert("Deleted ✅");
 loadAudios();
+}
+
+/* ================= FILTER ================= */
+window.filterCategory = async function(category){
+
+const querySnapshot = await getDocs(collection(db,"audios"));
+const list = document.getElementById("audioList");
+list.innerHTML = "";
+
+querySnapshot.forEach((docSnap)=>{
+const data = docSnap.data();
+
+if(category === "" || data.category === category){
+
+list.innerHTML += `
+<div style="border:1px solid #ccc;padding:10px;margin:10px;">
+<h4>${data.title}</h4>
+<p>Category: ${data.category}</p>
+<audio controls>
+<source src="${data.audio}">
+</audio>
+<br><br>
+<button onclick="deleteAudio('${docSnap.id}')">Delete</button>
+</div>
+`;
+
+}
+});
 }
 
 window.onload = loadAudios;
@@ -88,8 +134,28 @@ window.onload = loadAudios;
 <h3>Upload Audio</h3>
 
 <input type="text" id="title" placeholder="Audio Title"><br><br>
-<input type="text" id="audio" placeholder="Audio Link"><br><br>
+
+<select id="category">
+<option value="Khutbah">Khutbah</option>
+<option value="Jumamosi">Jumamosi</option>
+<option value="Jumapili">Jumapili</option>
+<option value="Ramadhani">Ramadhani</option>
+</select><br><br>
+
+<input type="file" id="audioFile" accept="audio/*"><br><br>
+
 <button onclick="saveAudio()">Save Audio</button>
+
+<hr>
+
+<h3>Filter</h3>
+<select onchange="filterCategory(this.value)">
+<option value="">All</option>
+<option value="Khutbah">Khutbah</option>
+<option value="Jumamosi">Jumamosi</option>
+<option value="Jumapili">Jumapili</option>
+<option value="Ramadhani">Ramadhani</option>
+</select>
 
 <hr>
 
@@ -98,13 +164,7 @@ window.onload = loadAudios;
 
 <hr>
 
-<button onclick="logout()">Logout</button>
-
-<script>
-function logout(){
-window.location.href="admin.html";
-}
-</script>
+<button onclick="window.location.href='admin.html'">Logout</button>
 
 </body>
 </html>
