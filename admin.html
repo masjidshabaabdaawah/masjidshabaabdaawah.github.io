@@ -48,14 +48,13 @@ border-radius:6px;
 <script>
 document.getElementById("loginBtn").addEventListener("click", function(){
 
-const pass = document.getElementById("password").value;
-const correctPassword = "Shabaab2026";
+var pass = document.getElementById("password").value;
 
-if(pass === correctPassword){
-localStorage.setItem("adminLogged","true");
+if(pass === "Shabaab2026"){ // 🔐 password yako
+sessionStorage.setItem("adminAuth","true");
 window.location.href = "dashboard.html";
 }else{
-alert("Wrong Password!");
+alert("Wrong Password");
 }
 
 });
