@@ -1,101 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
-  <style>
-    body{font-family:Arial;padding:20px;background:#f4f4f4;}
-    input,select,textarea{width:100%;padding:8px;margin-bottom:10px;}
-    button{padding:8px 15px;background:#00695c;color:white;border:none;border-radius:5px;}
-    .box{background:white;padding:15px;margin-top:15px;border-radius:8px;}
-    .delete{background:red;margin-top:10px;}
-  </style>
+<title>Admin Panel</title>
+<style>
+body{font-family:Arial;padding:20px;background:#f4f4f4;}
+input,select{width:100%;padding:8px;margin-bottom:10px;}
+button{padding:8px 15px;background:#00695c;color:white;border:none;border-radius:5px;}
+.box{background:white;padding:15px;border-radius:8px;margin-top:15px;}
+</style>
 </head>
 <body>
 
 <h2>Admin - Weka Audio</h2>
 
 <input type="text" id="title" placeholder="Jina la Audio">
-
-<textarea id="description" placeholder="Maelezo ya audio"></textarea>
+<textarea id="description" placeholder="Maelezo"></textarea>
 
 <select id="category">
-  <option value="darsa">Darsa</option>
-  <option value="jumaa">Khutbah za Ijumaa</option>
-  <option value="eid">Khutbah za Eid</option>
-  <option value="ramadhan">Darsa za Mwezi wa Ramadhani</option>
+<option value="darsa">Darsa</option>
+<option value="jumaa">Khutbah za Ijumaa</option>
+<option value="eid">Khutbah za Eid</option>
+<option value="ramadhan">Darsa za Ramadhani</option>
 </select>
 
-<input type="text" id="link" placeholder="Weka Link ya Audio (mp3)">
+<input type="text" id="link" placeholder="Link ya Audio">
 
 <button onclick="saveAudio()">Save Audio</button>
+
+<hr>
+
+<h2>Ratiba ya Swala (Edit)</h2>
+
+<input type="text" id="fajr" placeholder="Fajr">
+<input type="text" id="dhuhr" placeholder="Dhuhr">
+<input type="text" id="asr" placeholder="Asr">
+<input type="text" id="maghrib" placeholder="Maghrib">
+<input type="text" id="isha" placeholder="Isha">
+
+<button onclick="saveRatiba()">Save Ratiba</button>
+
+<hr>
 
 <h3>Audio Zote</h3>
 <div id="audioList"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBrgOTZN04zoRlpDzOgHFlK_5HvJW6pxD0",
-  authDomain: "masjidshabaab.firebaseapp.com",
-  databaseURL: "https://masjidshabaab-default-rtdb.firebaseio.com/",
-  projectId: "masjidshabaab",
-  storageBucket: "masjidshabaab.firebasestorage.app",
-  messagingSenderId: "1069424481338",
-  appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
+apiKey: "AIzaSyBrgOtZN04zoRlpDzOgHFlK_5HvJW6pxD0",
+authDomain: "masjidshabaab.firebaseapp.com",
+databaseURL: "https://masjidshabaab-default-rtdb.firebaseio.com/",
+projectId: "masjidshabaab",
+storageBucket: "masjidshabaab.firebasestorage.app",
+messagingSenderId: "1069424481338",
+appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+/* SAVE AUDIO */
 window.saveAudio = function(){
-  const title = document.getElementById("title").value;
-  const description = document.getElementById("description").value;
-  const category = document.getElementById("category").value;
-  const link = document.getElementById("link").value;
-
-  if(!title || !link){
-    alert("Jaza sehemu zote");
-    return;
-  }
-
-  push(ref(db,"audios"),{
-    title:title,
-    description:description,
-    category:category,
-    url:link,
-    date: Date.now()
-  });
-
-  alert("Imehifadhiwa!");
-  document.getElementById("title").value="";
-  document.getElementById("description").value="";
-  document.getElementById("link").value="";
+push(ref(db,"audios"),{
+title:document.getElementById("title").value,
+description:document.getElementById("description").value,
+category:document.getElementById("category").value,
+url:document.getElementById("link").value,
+date:Date.now()
+});
+alert("Audio Saved");
 };
 
-onValue(ref(db,"audios"),(snapshot)=>{
-  const container=document.getElementById("audioList");
-  container.innerHTML="";
+/* SAVE RATIBA */
+window.saveRatiba = function(){
+set(ref(db,"ratiba"),{
+fajr:document.getElementById("fajr").value,
+dhuhr:document.getElementById("dhuhr").value,
+asr:document.getElementById("asr").value,
+maghrib:document.getElementById("maghrib").value,
+isha:document.getElementById("isha").value
+});
+alert("Ratiba Saved");
+};
 
-  snapshot.forEach(child=>{
-    const data=child.val();
-    container.innerHTML+=`
-      <div class="box">
-        <b>${data.title}</b>
-        <p>${data.description || ""}</p>
-        <small>${data.category}</small><br>
-        <button class="delete" onclick="deleteAudio('${child.key}')">Delete</button>
-      </div>
-    `;
-  });
+/* LOAD AUDIO LIST */
+onValue(ref(db,"audios"),snapshot=>{
+const container=document.getElementById("audioList");
+container.innerHTML="";
+snapshot.forEach(child=>{
+const data=child.val();
+container.innerHTML+=`
+<div class="box">
+<b>${data.title}</b><br>
+<small>${data.category}</small><br>
+<button onclick="deleteAudio('${child.key}')">Delete</button>
+</div>
+`;
+});
 });
 
 window.deleteAudio=function(id){
-  remove(ref(db,"audios/"+id));
-  alert("Imefutwa");
+remove(ref(db,"audios/"+id));
 };
+
 </script>
 
 </body>
