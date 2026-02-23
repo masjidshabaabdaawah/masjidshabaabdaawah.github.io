@@ -1,65 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Login</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{
-font-family: Arial;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-background:#f2f2f2;
-}
-
-.box{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 4px 8px rgba(0,0,0,0.1);
-text-align:center;
-width:90%;
-max-width:300px;
-}
-
-input{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:10px;
-background:#1e7e34;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
-</style>
+  <title>Admin - Upload Audio Link</title>
 </head>
 <body>
 
-<div class="box">
-<h2>Admin Login</h2>
-<input type="password" id="password" placeholder="Enter Password">
-<button onclick="login()">Login</button>
-</div>
+<h2>Weka Audio Link</h2>
 
-<script>
-function login(){
-var pass = document.getElementById("password").value;
+<input type="text" id="title" placeholder="Jina la Audio"><br><br>
+<input type="text" id="link" placeholder="Weka Link ya Audio (mp3)"><br><br>
 
-if(pass === "Shabaab2026"){ 
-window.location.href = "dashboard.html?auth=ok";
-}else{
-alert("Wrong Password");
-}
-}
+<button onclick="saveAudio()">Save Audio</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBrgOTZN04zoRlpDzOgHFlK_5HvJW6pxD0",
+  authDomain: "masjidshabaab.firebaseapp.com",
+  databaseURL: "https://masjidshabaab-default-rtdb.firebaseio.com/",
+  projectId: "masjidshabaab",
+  storageBucket: "masjidshabaab.firebasestorage.app",
+  messagingSenderId: "1069424481338",
+  appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.saveAudio = function() {
+  const title = document.getElementById("title").value;
+  const link = document.getElementById("link").value;
+
+  if(title === "" || link === "") {
+    alert("Jaza sehemu zote");
+    return;
+  }
+
+  push(ref(db, "audios"), {
+    title: title,
+    url: link
+  });
+
+  alert("Audio imehifadhiwa!");
+  document.getElementById("title").value = "";
+  document.getElementById("link").value = "";
+};
 </script>
 
 </body>
