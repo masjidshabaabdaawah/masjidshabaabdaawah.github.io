@@ -1,59 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="sw">
 <head>
-  <title>Masjid Shabaab Daawah</title>
-  <style>
-    body { margin:0; font-family: Arial; background:#f4f4f4; }
-    .hero {
-      background:url('mosque.jpg') center/cover no-repeat;
-      height:250px;
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:28px;
-      font-weight:bold;
-      text-shadow:2px 2px 5px black;
-    }
-    .section { padding:20px; }
-    .categories a {
-      display:block;
-      padding:15px;
-      margin:10px 0;
-      background:#00695c;
-      color:white;
-      text-decoration:none;
-      border-radius:8px;
-      text-align:center;
-    }
-    .prayer { background:white; padding:15px; border-radius:8px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masjid Shabaab Daawah</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f4f4f4;
+}
+
+.hero{
+background:url("mosque.jpg") center/cover no-repeat;
+height:220px;
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-shadow:2px 2px 6px black;
+}
+
+.hero h1{
+margin:0;
+font-size:22px;
+}
+
+.section{
+padding:15px;
+}
+
+.categories button{
+width:100%;
+padding:12px;
+margin:6px 0;
+border:none;
+background:#00695c;
+color:white;
+border-radius:6px;
+font-size:15px;
+}
+
+.audio-card{
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.delete-btn{
+background:red;
+color:white;
+border:none;
+padding:5px 10px;
+border-radius:5px;
+margin-top:5px;
+}
+</style>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyBrgOtZN04zoRlpDzOgHFlK_5HvJW6pxD0",
+authDomain: "masjidshabaab.firebaseapp.com",
+databaseURL: "https://masjidshabaab-default-rtdb.firebaseio.com/",
+projectId: "masjidshabaab",
+storageBucket: "masjidshabaab.firebasestorage.app",
+messagingSenderId: "1069424481338",
+appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let allAudios = [];
+let currentCategory = "";
+
+/* LOAD AUDIO */
+onValue(ref(db,"audios"), snapshot=>{
+allAudios = [];
+snapshot.forEach(child=>{
+allAudios.push({ id: child.key, ...child.val() });
+});
+displayAudios();
+});
+
+/* DISPLAY AUDIO */
+function displayAudios(){
+const container = document.getElementById("audioList");
+container.innerHTML="";
+
+let filtered = allAudios.filter(a =>
+currentCategory === "" || a.category === currentCategory
+);
+
+filtered.reverse().forEach(audio=>{
+container.innerHTML += `
+<div class="audio-card">
+<h3>${audio.title}</h3>
+<p>${audio.description || ""}</p>
+<audio controls src="${audio.url}"></audio><br>
+<a href="${audio.url}" download>Download</a>
+</div>
+`;
+});
+}
+
+/* FILTER CATEGORY */
+window.filterCategory = function(cat){
+currentCategory = cat;
+displayAudios();
+};
+
+/* SEARCH */
+window.searchAudio = function(){
+const value = document.getElementById("searchInput").value.toLowerCase();
+const container = document.getElementById("audioList");
+container.innerHTML="";
+
+allAudios
+.filter(a => a.title.toLowerCase().includes(value))
+.forEach(audio=>{
+container.innerHTML += `
+<div class="audio-card">
+<h3>${audio.title}</h3>
+<p>${audio.description || ""}</p>
+<audio controls src="${audio.url}"></audio>
+</div>
+`;
+});
+};
+
+/* DELETE (Inaonekana tu kama admin ameingia) */
+window.deleteAudio = function(id){
+if(confirm("Futa audio?")){
+remove(ref(db,"audios/"+id));
+}
+};
+</script>
+
 </head>
 <body>
 
+<!-- HERO -->
 <div class="hero">
-  Masjid Shabaab Daawah - Buhongwa
+<h1>MASJID SHABAAB DAAWAH</h1>
+<p>Buhongwa - Mwanza</p>
 </div>
 
+<!-- RATIBA -->
 <div class="section">
-  <h3>Ratiba ya Swala</h3>
-  <div class="prayer">
-    Fajr – 05:15<br>
-    Dhuhr – 13:00<br>
-    Asr – 16:30<br>
-    Maghrib – 18:45<br>
-    Isha – 20:00
-  </div>
+<h3>Ratiba ya Swala</h3>
+<div style="background:white;padding:10px;border-radius:8px;">
+Fajr – 05:15<br>
+Dhuhr – 13:00<br>
+Asr – 16:30<br>
+Maghrib – 18:45<br>
+Isha – 20:00
+</div>
 </div>
 
+<!-- SEARCH -->
 <div class="section">
-  <h3>Vipengele</h3>
-  <div class="categories">
-    <a href="category.html?type=darsa">Darsa za kila Jumamosi na Jumapili</a>
-    <a href="category.html?type=jumaa">Khutbah za Ijumaa</a>
-    <a href="category.html?type=eid">Khutbah za Eid</a>
-  </div>
+<input type="text" id="searchInput" placeholder="Tafuta audio..." 
+onkeyup="searchAudio()" 
+style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;">
 </div>
+
+<!-- CATEGORIES -->
+<div class="section categories">
+<button onclick="filterCategory('darsa')">
+Darsa za Jumamosi & Jumapili
+</button>
+
+<button onclick="filterCategory('jumaa')">
+Khutbah za Ijumaa
+</button>
+
+<button onclick="filterCategory('eid')">
+Khutbah za Eid
+</button>
+</div>
+
+<!-- AUDIO LIST -->
+<div class="section" id="audioList"></div>
 
 </body>
 </html>
