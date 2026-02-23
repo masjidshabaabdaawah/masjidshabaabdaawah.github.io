@@ -12,9 +12,10 @@ font-family:Arial;
 background:#f4f4f4;
 }
 
+/* HERO */
 .hero{
 background:url("mosque.jpg") center/cover no-repeat;
-height:220px;
+height:230px;
 color:white;
 display:flex;
 flex-direction:column;
@@ -22,16 +23,19 @@ justify-content:center;
 align-items:center;
 text-shadow:2px 2px 6px black;
 }
+.hero h1{margin:0;font-size:22px;}
 
-.hero h1{
-margin:0;
-font-size:22px;
+/* SECTION */
+.section{padding:15px;}
+
+/* RATIBA */
+#ratibaBox{
+background:white;
+padding:12px;
+border-radius:8px;
 }
 
-.section{
-padding:15px;
-}
-
+/* CATEGORIES */
 .categories button{
 width:100%;
 padding:12px;
@@ -43,6 +47,7 @@ border-radius:6px;
 font-size:15px;
 }
 
+/* AUDIO CARD */
 .audio-card{
 background:white;
 padding:15px;
@@ -50,19 +55,64 @@ margin-bottom:15px;
 border-radius:8px;
 box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
-
-.delete-btn{
-background:red;
-color:white;
-border:none;
-padding:5px 10px;
-border-radius:5px;
-margin-top:5px;
-}
+.audio-card h3{margin:0;}
 </style>
 
-<!-- Firebase -->
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+<h1>MASJID SHABAAB DAAWAH</h1>
+<p>Buhongwa - Mwanza</p>
+</div>
+
+<!-- SEARCH (NJE YA CATEGORY) -->
+<div class="section">
+<input type="text" id="searchInput"
+placeholder="Tafuta audio..."
+onkeyup="searchAudio()"
+style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;">
+</div>
+
+<!-- RATIBA -->
+<div class="section">
+<h3>Ratiba ya Swala</h3>
+<div id="ratibaBox">Inapakia...</div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section">
+<h3>Vipengele</h3>
+
+<div class="categories">
+<button onclick="openCategory('darsa')">
+Darsa za Jumamosi & Jumapili
+</button>
+
+<button onclick="openCategory('jumaa')">
+Khutbah za Ijumaa
+</button>
+
+<button onclick="openCategory('eid')">
+Khutbah za Eid
+</button>
+
+<button onclick="openCategory('ramadhan')">
+Darsa za Mwezi wa Ramadhani
+</button>
+
+</div>
+</div>
+
+<!-- AUDIO LIST -->
+<div class="section">
+<div id="audioList"></div>
+</div>
+
+<!-- FIREBASE SCRIPT -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
@@ -83,17 +133,18 @@ let allAudios = [];
 let currentCategory = "";
 
 /* LOAD AUDIO */
-onValue(ref(db,"audios"), snapshot=>{
-allAudios = [];
+onValue(ref(db,"audios"),snapshot=>{
+allAudios=[];
 snapshot.forEach(child=>{
-allAudios.push({ id: child.key, ...child.val() });
+allAudios.push({ id:child.key, ...child.val() });
 });
 displayAudios();
 });
 
 /* DISPLAY AUDIO */
 function displayAudios(){
-const container = document.getElementById("audioList");
+
+const container=document.getElementById("audioList");
 container.innerHTML="";
 
 let filtered = allAudios.filter(a =>
@@ -101,7 +152,7 @@ currentCategory === "" || a.category === currentCategory
 );
 
 filtered.reverse().forEach(audio=>{
-container.innerHTML += `
+container.innerHTML+=`
 <div class="audio-card">
 <h3>${audio.title}</h3>
 <p>${audio.description || ""}</p>
@@ -112,22 +163,22 @@ container.innerHTML += `
 });
 }
 
-/* FILTER CATEGORY */
-window.filterCategory = function(cat){
-currentCategory = cat;
+/* CATEGORY CLICK */
+window.openCategory=function(cat){
+currentCategory=cat;
 displayAudios();
 };
 
 /* SEARCH */
-window.searchAudio = function(){
-const value = document.getElementById("searchInput").value.toLowerCase();
-const container = document.getElementById("audioList");
+window.searchAudio=function(){
+const value=document.getElementById("searchInput").value.toLowerCase();
+const container=document.getElementById("audioList");
 container.innerHTML="";
 
 allAudios
-.filter(a => a.title.toLowerCase().includes(value))
+.filter(a=>a.title.toLowerCase().includes(value))
 .forEach(audio=>{
-container.innerHTML += `
+container.innerHTML+=`
 <div class="audio-card">
 <h3>${audio.title}</h3>
 <p>${audio.description || ""}</p>
@@ -137,62 +188,7 @@ container.innerHTML += `
 });
 };
 
-/* DELETE (Inaonekana tu kama admin ameingia) */
-window.deleteAudio = function(id){
-if(confirm("Futa audio?")){
-remove(ref(db,"audios/"+id));
-}
-};
 </script>
-
-</head>
-<body>
-
-<!-- HERO -->
-<div class="hero">
-<h1>MASJID SHABAAB DAAWAH</h1>
-<p>Buhongwa - Mwanza</p>
-</div>
-
-<!-- RATIBA -->
-<div class="section">
-<h3>Ratiba ya Swala</h3>
-<div style="background:white;padding:10px;border-radius:8px;">
-Fajr – 05:15<br>
-Dhuhr – 13:00<br>
-Asr – 16:30<br>
-Maghrib – 18:45<br>
-Isha – 20:00
-</div>
-</div>
-
-<!-- SEARCH -->
-<div class="section">
-<input type="text" id="searchInput" placeholder="Tafuta audio..." 
-onkeyup="searchAudio()" 
-style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;">
-</div>
-
-<!-- CATEGORIES -->
-<div class="section categories">
-<button onclick="filterCategory('darsa')">
-Darsa za Jumamosi & Jumapili
-</button>
-
-<button onclick="filterCategory('jumaa')">
-Khutbah za Ijumaa
-</button>
-
-<button onclick="filterCategory('eid')">
-Khutbah za Eid
-</button>
-<button onclick="filterCategory('ramadhan')">
-Darsa za Mwezi wa Ramadhani
-  </button>
-</div>
-
-<!-- AUDIO LIST -->
-<div class="section" id="audioList"></div>
 
 </body>
 </html>
