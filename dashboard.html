@@ -10,15 +10,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { getDatabase, ref, push, onValue, remove } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-/* 🔥 FIREBASE CONFIG */
+/* 🔥 FIREBASE CONFIG YAKO HALISI */
+
 const firebaseConfig = {
-apiKey: "AIzaSyCRKV93NJ7YX1zP7xAiG340mTXDTIEweaQ",
-authDomain: "masjid-shabaab.firebaseapp.com",
-databaseURL: "https://masjid-shabaab-default-rtdb.firebaseio.com/",
-projectId: "masjid-shabaab",
-storageBucket: "masjid-shabaab.firebasestorage.app",
-messagingSenderId: "590758366670",
-appId: "1:590758366670:web:2fe678c410285fab5fef9f"
+apiKey: "AIzaSyBrgOTZN04zoRlpDzOgHFlK_5HvJW6pxD0",
+authDomain: "masjidshabaab.firebaseapp.com",
+databaseURL: "https://masjidshabaab-default-rtdb.firebaseio.com/",
+projectId: "masjidshabaab",
+storageBucket: "masjidshabaab.firebasestorage.app",
+messagingSenderId: "1069424481338",
+appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -32,22 +33,24 @@ window.location.href = "admin.html";
 
 /* ================= LOAD AUDIO ================= */
 
-window.loadAudios = function(){
+window.onload = function(){
+loadAudios();
+};
 
-const dbRef = ref(db,"audios");
+function loadAudios(){
 
-onValue(dbRef,(snapshot)=>{
+onValue(ref(db,"audios"),(snapshot)=>{
 const list = document.getElementById("audioList");
 list.innerHTML = "";
 
-snapshot.forEach(child => {
+snapshot.forEach(child=>{
 
 const data = child.val();
 
 list.innerHTML += `
 <div style="border:1px solid #ccc;padding:10px;margin:10px;">
 <h4>${data.title}</h4>
-<p>Category: ${data.category}</p>
+<p>${data.category}</p>
 <audio controls>
 <source src="${data.audio}">
 </audio>
@@ -58,7 +61,6 @@ list.innerHTML += `
 
 });
 });
-
 }
 
 window.deleteAudio = function(id){
@@ -66,7 +68,67 @@ remove(ref(db,"audios/"+id));
 alert("Deleted ✅");
 }
 
-window.onload = loadAudios;
+/* ================= UPLOAD ================= */
+
+document.addEventListener("DOMContentLoaded", function(){
+
+document.getElementById("uploadBtn").addEventListener("click", async function(e){
+
+e.preventDefault();
+
+const fileInput = document.getElementById("audioFile");
+const title = document.getElementById("title").value;
+const category = document.getElementById("category").value;
+const file = fileInput.files[0];
+
+if(!file){
+alert("Select Audio File");
+return;
+}
+
+const formData = new FormData();
+formData.append("file", file);
+formData.append("upload_preset", "ml_default"); // hakikisha preset ipo Cloudinary
+
+try{
+
+const response = await fetch(
+"https://api.cloudinary.com/v1_1/drlltmnlb/upload",
+{
+method:"POST",
+body:formData
+}
+);
+
+const data = await response.json();
+
+if(!data.secure_url){
+alert("Upload Failed ❌");
+return;
+}
+
+const audioUrl = data.secure_url;
+
+/* Save to Firebase */
+push(ref(db,"audios"),{
+title:title,
+category:category,
+audio:audioUrl
+});
+
+alert("Upload Success ✅");
+
+fileInput.value = "";
+document.getElementById("title").value = "";
+
+}catch(error){
+alert("Error: " + error.message);
+console.log(error);
+}
+
+});
+
+});
 
 </script>
 
@@ -95,103 +157,5 @@ window.onload = loadAudios;
 <h3>Audio List</h3>
 <div id="audioList"></div>
 
-<script>
-
-/* ================= CLOUDINARY UPLOAD ================= */
-
-async function uploadToCloudinary(){
-
-const fileInput = document.getElementById("audioFile");
-const title = document.getElementById("title").value;
-const category = document.getElementById("category").value;
-
-const file = fileInput.files[0];
-
-if(!file){
-alert("Select Audio File");
-return;
-}
-
-const formData = new FormData();
-formData.append("file", file);
-formData.append("upload_preset", "ml_default");
-
-try{
-
-const response = await fetch(
-"https://api.cloudinary.com/v1_1/drlltmnlb/upload",
-{
-method:"POST",
-body:formData
-}
-);
-
-const data = await response.json();
-
-const audioUrl = data.secure_url;
-
-/* Save To Firebase Realtime */
-push(ref(db,"audios"),{
-title:title,
-category:category,
-audio:audioUrl
-});
-
-alert("Uploaded Successfully ✅");
-
-fileInput.value = "";
-document.getElementById("title").value = "";
-
-}catch(error){
-alert("Upload Failed ❌\n" + error.message);
-console.log(error);
-}
-
-}
-
-</script>
-<script>
-document.getElementById("uploadBtn").addEventListener("click", async function(){
-
-const fileInput = document.getElementById("audioFile");
-const title = document.getElementById("title").value;
-const category = document.getElementById("category").value;
-const file = fileInput.files[0];
-
-if(!file){
-alert("Select Audio File");
-return;
-}
-
-const formData = new FormData();
-formData.append("file", file);
-formData.append("upload_preset", "ml_default");
-
-try{
-
-const response = await fetch(
-"https://api.cloudinary.com/v1_1/drlltmnlb/upload",
-{
-method:"POST",
-body:formData
-}
-);
-
-const data = await response.json();
-
-if(!data.secure_url){
-alert("Upload Failed ❌");
-return;
-}
-
-alert("Upload Success ✅");
-
-}catch(error){
-alert("Error: " + error.message);
-console.log(error);
-}
-
-});
-</script>
 </body>
 </html>
