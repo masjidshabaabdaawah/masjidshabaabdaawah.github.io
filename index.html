@@ -121,7 +121,6 @@ Darsa za Mwezi wa Ramadhani
 
 <!-- FIREBASE SCRIPT -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
@@ -137,6 +136,29 @@ appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+const box = document.getElementById("ratibaBox");
+
+onValue(ref(db,"ratiba"), snapshot => {
+
+console.log("DATA FROM FIREBASE:", snapshot.val());
+
+const data = snapshot.val();
+
+if(data){
+box.innerHTML = `
+Fajr – ${data.fajr || "-"}<br>
+Dhuhr – ${data.dhuhr || "-"}<br>
+Asr – ${data.asr || "-"}<br>
+Maghrib – ${data.maghrib || "-"}<br>
+Isha – ${data.isha || "-"}
+`;
+} else {
+box.innerHTML = "Hakuna ratiba kwenye database.";
+}
+
+});
+</script>
 
 let allAudios = [];
 let currentCategory = "";
