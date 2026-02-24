@@ -120,6 +120,7 @@ Darsa za Mwezi wa Ramadhani
 </div>
 
 <!-- ================= FIREBASE ================= -->
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
@@ -137,11 +138,10 @@ appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+/* ================= RATIBA ================= */
 const box = document.getElementById("ratibaBox");
 
 onValue(ref(db,"ratiba"), snapshot => {
-
-console.log("🔥 RAW DATA:", snapshot.val());
 
 if(snapshot.exists()){
 const data = snapshot.val();
@@ -156,49 +156,13 @@ Isha – ${data.isha || "-"}
 box.innerHTML = "⚠️ Hakuna ratiba kwenye database";
 }
 
-window.increaseView = function(id){
-
-import { ref, get, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-const audioRef = ref(db,"audios/"+id);
-
-get(audioRef).then(snapshot=>{
-if(snapshot.exists()){
-const data = snapshot.val();
-const newViews = (data.views || 0) + 1;
-
-set(audioRef,{
-...data,
-views:newViews
-});
-}
 });
 
-};
-});
-</script>
-  <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-const firebaseConfig = {
-apiKey: "AIzaSyCRKV93NJ7YX1zP7xAiG340mTXDTIEweaQ",
-authDomain: "masjidshabaab.firebaseapp.com",
-databaseURL: "https://masjidshabaab-default-rtdb.firebaseio.com/",
-projectId: "masjidshabaab",
-storageBucket: "masjidshabaab.firebasestorage.app",
-messagingSenderId: "1069424481338",
-appId: "1:1069424481338:web:4eebe45e31ec3c24aad103"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+/* ================= AUDIOS ================= */
 
 let allAudios = [];
 let currentCategory = "";
 
-/* LOAD AUDIO */
 onValue(ref(db,"audios"), snapshot=>{
 allAudios = [];
 snapshot.forEach(child=>{
@@ -207,12 +171,9 @@ allAudios.push({ id:child.key, ...child.val() });
 displayAudios();
 });
 
-/* DISPLAY AUDIO */
 function displayAudios(){
 
 const container = document.getElementById("audioList");
-if(!container) return;
-
 container.innerHTML = "";
 
 let filtered = allAudios.filter(a =>
@@ -232,13 +193,11 @@ container.innerHTML += `
 });
 }
 
-/* CATEGORY */
 window.openCategory = function(cat){
 currentCategory = cat;
 displayAudios();
 };
 
-/* SEARCH */
 window.searchAudio = function(){
 const value = document.getElementById("searchInput").value.toLowerCase();
 const container = document.getElementById("audioList");
