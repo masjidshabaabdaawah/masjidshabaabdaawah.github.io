@@ -3,9 +3,15 @@
   "short_name": "Masjid App",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d1b2a",
-  "theme_color": "#0d1b2a",
+  "display_override": ["standalone", "fullscreen"],
+  "theme_color": "#00695c",
+  "background_color": "#ffffff",
   "orientation": "portrait",
+  "lang": "sw",
+  "scope": "/",
+  "description": "App rasmi ya Masjid Shabaab Daawah - Ratiba, Darsa na Khutbah",
+  "id": "/",
+
   "icons": [
     {
       "src": "icon-192.png",
